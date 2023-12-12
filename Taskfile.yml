@@ -1,0 +1,85 @@
+version: "3"
+
+env:
+  GO_VERSION: 1.21.1
+  GO: "go{{.GO_VERSION}}"
+  GOOSE_VERSION: v3.16.0
+  LINT_VERSION: v1.54.2
+
+tasks:
+  run:
+    desc: server を起動
+    cmds:
+      - "{{.GO}} run ./internal/main.go"
+
+  fmt:
+    desc: go fmt を実行
+    cmds:
+      - "{{.GO}} fmt ./internal/..."
+
+  lint:
+    desc: golangci-lint run を実行
+    cmds:
+      - golangci-lint run --verbose --config .golangci.yml
+
+  lint-fix:
+    desc: golangci-lint run --fix を実行
+    cmds:
+      - golangci-lint run --verbose --config .golangci.yml --fix
+
+  install-tools:
+    desc: 必要なツールをまとめてインストール
+    cmds:
+      - task install-go
+      - task install-goose
+      - task install-lint
+
+  install-go:
+    desc: go{{.GO_VERSION}} をインストール
+    cmds:
+      - go install golang.org/dl/{{.GO}}@latest
+      - "{{.GO}} download"
+
+  install-goose:
+    desc: go{{.GOOSE_VERSION}} をインストール
+    cmds:
+      - go install github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}}
+
+  install-lint:
+    desc: golangci-lint{{.LINT_VERSION}} をインストール
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.LINT_VERSION}}
+  
+  swag:
+    desc: swaggoを実行してドキュメントを生成する
+    cmds:
+      - swag fmt
+      - swag init -d ./internal
+
+  db-init:
+    desc: DBコンテナを初期化
+    cmds:
+      - docker stop todo_db || true && docker rm todo_db || true
+      - docker build -t todo_db:1 -f Dockerfile .
+      - docker run --name todo_db -d -p 3306:3306 todo_db:1
+      - task db-up
+      - task db-seeds
+
+  db-up:
+    desc: migrationの最新化
+    cmds:
+      - goose -dir ./build/db/migrations mysql "user:pass@/task_db?parseTime=true" up
+
+  db-down:
+    desc: migrationを一つ戻す
+    cmds:
+      - goose -dir ./build/db/migrations mysql "user:pass@/task_db?parseTime=true" down
+
+  db-seeds:
+    desc: seedsを適用する
+    cmds:
+      - go run ./build/db/seeds/seeds.go
+
+  db-status:
+    cmds:
+      - goose mysql "user:pass@/task_db?parseTime=true" status

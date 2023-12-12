@@ -1,0 +1,45 @@
+-- +goose Up
+CREATE TABLE company (
+    id int NOT NULL AUTO_INCREMENT,
+    company_name VARCHAR(20) NOT NULL,
+    create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE user (
+    id int NOT NULL AUTO_INCREMENT,
+    user_name VARCHAR(20) NOT NULL,
+    user_hash VARCHAR(64) NOT NULL,
+    user_role VARCHAR(6) NOT NULL,
+    user_type VARCHAR(6) NOT NULL,
+    company_id int NOT NULL,
+    create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    CONSTRAINT FOREIGN KEY (company_id) REFERENCES company (id)
+);
+
+create TABLE task (
+    id int NOT NULL AUTO_INCREMENT,
+    title VARCHAR(50) NOT NULL,
+    detail VARCHAR(200) NULL,
+    task_status VARCHAR(10) NOT NULL,
+    visibility VARCHAR(7) NOT NULL,
+    person_in_charge_id int NULL,
+    limit_date TIMESTAMP NULL,
+    
+    creator_id int NOT NULL,
+    updator_id int NULL,
+    create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    CONSTRAINT FOREIGN KEY (person_in_charge_id) REFERENCES user (id),
+    CONSTRAINT FOREIGN KEY (creator_id) REFERENCES user (id),
+    CONSTRAINT FOREIGN KEY (updator_id) REFERENCES user (id)
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS task;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS company;
