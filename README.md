@@ -1,7 +1,23 @@
 # TODO 管理 API
 
 - 会社には管理会社と利用会社の２種類が、ユーザには管理者と一般ユーザの２種類が存在し、企業情報やユーザ情報の扱いに関する権限が分かれている。
+- 管理会社のIDは1で固定である。
 - タスクに関しては、編集者と閲覧者が存在し、編集者はタスクの追加・編集・閲覧が可能だが、閲覧者は閲覧のみ可能である。
+
+## シードデータについて
+### Company
+- ID:1 管理会社
+- ID:2 利用会社
+
+### User
+- ID:1 管理会社の管理者 password: super-admin
+- ID:2 管理会社のユーザ password: super-user
+- ID:3 利用会社の管理者 password: normal-admin
+- ID:3 利用会社の一般編集者 password: normal-user
+- ID:3 利用会社の一般閲覧者 password: normal-user
+
+### シードデータの所在
+`build/db/seeds/seeds.go` を参照
 
 # requirements
 
